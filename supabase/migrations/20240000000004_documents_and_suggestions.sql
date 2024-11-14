@@ -1,12 +1,12 @@
 -- Create Documents table
-CREATE TABLE IF NOT EXISTS public.documents (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    title TEXT NOT NULL,
-    content TEXT,
-    user_id UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc', NOW()) NOT NULL,
-    -- Add unique constraint for the composite key
-    UNIQUE (id, created_at)
+CREATE TABLE documents (
+  id uuid PRIMARY KEY,
+  content text,
+  title text,
+  user_id uuid REFERENCES auth.users(id),
+  embedding vector(1536),  -- for ada-002 model
+  -- or embedding vector(384) for text-embedding-3-small model
+  created_at timestamp with time zone DEFAULT timezone('utc'::text, now())
 );
 
 -- Create Suggestions table

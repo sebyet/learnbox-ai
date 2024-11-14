@@ -167,11 +167,13 @@ export async function saveDocument({
   title,
   content,
   userId,
+  embedding,
 }: {
   id: string;
   title: string;
   content?: string;
   userId: string;
+  embedding: number[];
 }) {
   await mutateQuery(
     async (client, { id, title, content, userId }) => {
@@ -204,6 +206,7 @@ export async function saveDocument({
           id,
           title,
           content,
+          embedding,
           user_id: userId,
           created_at: timestamp,
         });
@@ -233,7 +236,7 @@ export async function saveDocument({
 
       throw new Error('Failed to save document after multiple attempts');
     },
-    [{ id, title, content, userId }],
+    [{ id, title, content, userId, embedding }],
     [`document_${id}`, `document_${id}_versions`, 'documents']
   );
 }

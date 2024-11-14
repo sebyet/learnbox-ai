@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 
 import { saveDocument } from '@/db/mutations';
 import { createClient } from '@/lib/supabase/server';
+import { getEmbedding } from '@/lib/embeddings';
 
 export async function GET(req: Request) {
   try {
@@ -64,24 +65,30 @@ export async function POST(req: Request) {
       .single();
 
     if (existingDoc) {
-      // If document exists, do an update instead of insert
+      // If document exists, update both document and embedding
+      const embedding = await getEmbedding(content);
+
       const { error } = await supabase
         .from('documents')
         .update({
           content,
           title,
+          embedding
         })
         .eq('id', id)
         .eq('user_id', user.id);
 
       if (error) throw error;
     } else {
-      // If document doesn't exist, do an insert
+      // If document doesn't exist, save document with embedding
+      const embedding = await getEmbedding(content);
+
       await saveDocument({
         id,
         content,
         title,
         userId: user.id,
+        embedding,
       });
     }
 
@@ -114,9 +121,12 @@ export async function PATCH(request: Request) {
     const { content, title }: { content: string; title: string } =
       await request.json();
 
+    // Generate embedding for the updated content
+    const embedding = await getEmbedding(content);
+
     const { error } = await supabase
       .from('documents')
-      .update({ content, title })
+      .update({ content, title, embedding })
       .eq('id', id)
       .eq('user_id', user.id);
 

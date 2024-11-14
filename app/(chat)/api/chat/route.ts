@@ -28,6 +28,7 @@ import {
 } from '@/lib/utils';
 
 import { generateTitleFromUserMessage } from '../../actions';
+import { getEmbedding } from '@/lib/embeddings';
 
 export const maxDuration = 60;
 
@@ -267,11 +268,13 @@ export async function POST(request: Request) {
             streamingData.append({ type: 'finish', content: '' });
 
             if (user && user.id) {
+              const embedding = await getEmbedding(draftText);
               await saveDocument({
                 id,
                 title,
                 content: draftText,
                 userId: user.id,
+                embedding,
               });
             }
 
@@ -345,11 +348,13 @@ export async function POST(request: Request) {
             streamingData.append({ type: 'finish', content: '' });
 
             if (user && user.id) {
+              const embedding = await getEmbedding(draftText);
               await saveDocument({
                 id,
                 title: document.title,
                 content: draftText,
                 userId: user.id,
+                embedding,
               });
             }
 
